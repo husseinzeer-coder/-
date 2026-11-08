@@ -12,8 +12,8 @@
 <body>
   <main class="wrap">
     <section class="controls">
-      <div class="toolbar"><div><h1>إنجاز التسميع اليومي</h1><p>اختر القالب ثم أدخل البيانات. القالب الثالث لتقرير اللقاء بإدخال يدوي دون Google Sheets.</p></div><label>التاريخ <input type="date" id="date"></label></div>
-      <div class="template-choice"><label for="template">اختر قالب التقرير</label><select id="template"><option value="classic">القالب الأول — مجموعتان</option><option value="single12">القالب الثاني — مجموعة 12 طالبًا</option><option value="meeting">القالب الثالث — تقرير اللقاء (حتى 25 طالبًا)</option></select><span>القالب الأول يبقى بنفس أسمائه، وفي الثاني تستطيع تعديل الأسماء وحفظها.</span></div>
+      <div class="toolbar"><div><h1>إنجاز التسميع اليومي</h1><p>اختر القالب ثم أدخل البيانات. تقرير اللقاء بإدخال يدوي دون Google Sheets، وقالب 12 طالبًا للتسميع اليومي.</p></div><label>التاريخ <input type="date" id="date"></label></div>
+      <div class="template-choice"><label for="template">اختر قالب التقرير</label><select id="template"><option value="single12">قالب التسميع — مجموعة 12 طالبًا</option><option value="meeting">قالب تقرير اللقاء — حتى 25 طالبًا</option></select><span>يمكنك تعديل أسماء الطلاب في قالب الـ12 طالبًا وتقرير اللقاء، وكل اسم يبدأ بالرمز «-».</span></div>
       <label for="paste">بيانات Google Sheets</label>
       <textarea id="paste" placeholder="الصق الصفوف مع عناوين الأعمدة أو بدونها؛ ويمكن ترتيب الأعمدة: الاسم، الصفحات، السورة، التقييم"></textarea>
       <div class="actions">
