@@ -1,10 +1,12 @@
 /* تحكم التطبيق: إدخال البيانات، الربط بالطلاب، الحفظ المحلي، تصدير الصورة. */
 (() => {
   'use strict';
+  const reportId=new URLSearchParams(location.search).get('report');const reportScope=reportId?':'+reportId:'';
+
   let templateId='single12';let groups=window.REPORT_TEMPLATES[templateId].groups;const renderer=window.ReportRenderer;
   const $=id=>document.getElementById(id);
   let all=[];
-  let storagePrefix='fatima-hoffaz-v3:single12:';
+  let storagePrefix='fatima-hoffaz-v3:single12'+reportScope+':';
   const statuses=[['','— اختر —'],['100','100%'],['50','50%'],['X','X'],['0','0%'],['absent','غائب'],['blocked','-']];
   let records={};let currentDate='';let renderVersion=0;let busy=false;
   const norm=s=>String(s||'').replace(/[\u064B-\u065F\u0670ـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,'').trim();
@@ -54,10 +56,10 @@
     if(navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'إنجاز التسميع اليومي'});notify('تم فتح المشاركة.')}
     else{saveBlob(blob,filename());notify('المشاركة المباشرة غير متاحة؛ تم تجهيز تنزيل PNG بدلًا منها.')}
   })}
-  function saveNames(){if(!window.REPORT_TEMPLATES[templateId].editableNames)return;try{localStorage.setItem('fatima-hoffaz:v3:names:'+templateId,JSON.stringify(all.map(s=>s.name)))}catch(e){notify('تعذر حفظ الأسماء',true)}}
+  function saveNames(){if(!window.REPORT_TEMPLATES[templateId].editableNames)return;try{localStorage.setItem('fatima-hoffaz:v3:names:'+templateId+reportScope,JSON.stringify(all.map(s=>s.name)))}catch(e){notify('تعذر حفظ الأسماء',true)}}
   function restoreNames(){if(!window.REPORT_TEMPLATES[templateId].editableNames)return;try{const names=JSON.parse(localStorage.getItem('fatima-hoffaz:v3:names:'+templateId)||'null');if(Array.isArray(names))all.forEach((s,i)=>{if(typeof names[i]==='string'&&names[i].trim())s.name=names[i].trim()});}catch(e){}}
-  function switchTemplate(id){templateId=id;groups=window.REPORT_TEMPLATES[id].groups;storagePrefix='fatima-hoffaz-v3:'+id+':';rebuildIndex();restoreNames();rebuildIndex();let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}if(last)$('date').value=last;load($('date').value);renderEditors();draw();notify('القالب جاهز. التعديلات محفوظة بشكل مستقل لكل قالب.');}
-  function init(){const iso=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'});let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}$('date').value=last||iso;load($('date').value);
-    $('template').addEventListener('change',e=>{if(e.target.value==='meeting'){window.location.href='meeting.html';return;}switchTemplate(e.target.value);});$('date').addEventListener('change',dateChanged);$('import').addEventListener('click',importPaste);$('reset').addEventListener('click',reset);$('download').addEventListener('click',download);$('share').addEventListener('click',share);$('print').addEventListener('click',()=>window.print());renderEditors();draw();}
+  function switchTemplate(id){templateId=id;groups=window.REPORT_TEMPLATES[id].groups;storagePrefix='fatima-hoffaz-v3:'+id+reportScope+':';rebuildIndex();restoreNames();rebuildIndex();let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}if(last)$('date').value=last;load($('date').value);renderEditors();draw();notify('القالب جاهز. التعديلات محفوظة بشكل مستقل لكل قالب.');}
+  function init(){$('newReport').addEventListener('click',()=>{const id=(crypto.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));const url=new URL('index.html',location.href);url.searchParams.set('report',id);window.open(url.href,'_blank','noopener');});const iso=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'});let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}$('date').value=last||iso;load($('date').value);
+    $('template').addEventListener('change',e=>{if(e.target.value==='meeting'){const url=new URL('meeting.html',location.href);if(reportId)url.searchParams.set('report',reportId);window.location.href=url.href;return;}switchTemplate(e.target.value);});$('date').addEventListener('change',dateChanged);$('import').addEventListener('click',importPaste);$('reset').addEventListener('click',reset);$('download').addEventListener('click',download);$('share').addEventListener('click',share);$('print').addEventListener('click',()=>window.print());renderEditors();draw();}
   init();
 })();
