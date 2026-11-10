@@ -131,10 +131,20 @@
  $('workspaceName').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
  backupButtons();
  initData();
+ // توافق روابط التقارير القديمة التي كانت تفتح في صفحة meeting.html منفصلة.
+ const oldReportId=new URLSearchParams(location.search).get('report');
+ if(oldReportId&&/^[a-zA-Z0-9-]{1,120}$/.test(oldReportId)){
+   const existing=safeGet('fatima-hoffaz:meeting-v2:'+oldReportId);
+   if(existing&&!tabs.some(t=>t.id===oldReportId)&&tabs.length<MAX){
+     try{localStorage.setItem('fatima-hoffaz:workspace:meeting:'+oldReportId,existing)}catch(e){}
+     tabs.push({id:oldReportId,type:'meeting',name:'تقرير لقاء مستعاد',legacy:false});
+     saveMeta();
+   }
+ }
  const desired=new URLSearchParams(location.search).get('view');
  const last=safeGet(LAST);
  if(tabs.length){
-  const wanted=desired==='meeting'?tabs.find(t=>t.type==='meeting')?.id:last;
+  const wanted=(oldReportId&&tabs.some(t=>t.id===oldReportId)?oldReportId:null)||(desired==='meeting'?tabs.find(t=>t.type==='meeting')?.id:last);
   activate(tabs.some(t=>t.id===wanted)?wanted:tabs[0].id);
  }else{
   Object.values(panes).forEach(p=>p.hidden=true);
