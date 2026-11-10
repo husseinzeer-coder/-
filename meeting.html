@@ -75,18 +75,27 @@ function clamp(v,a,b){return Math.min(b,Math.max(a,v))}
 function text(t,x,y,max,font=24,color='#0d3542',weight='700',align='center'){t=String(t??'');ctx.font=`${weight} ${font}px Tahoma, Arial, sans-serif`;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='middle';let n=font;while(ctx.measureText(t).width>max&&n>10){n--;ctx.font=`${weight} ${n}px Tahoma, Arial, sans-serif`;}ctx.fillText(t,x,y,max)}
 function rounded(x,y,w,h,r,fill,stroke,line=1){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.stroke()}}
 async function loadLogo(data){if(!data)return null;return await new Promise(resolve=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=data})}
-function logoCrop(im){if(!im)return;const cx=113,cy=151,rad=77;ctx.save();ctx.beginPath();ctx.arc(cx,cy,rad,0,2*Math.PI);ctx.clip();const scale=Math.max(rad*2/im.width,rad*2/im.height),w=im.width*scale,h=im.height*scale;ctx.drawImage(im,cx-w/2,cy-h/2,w,h);ctx.restore()}
-function drawHeading(){ctx.fillStyle='#0d3542';text(state.title||'تقرير اللقاء',462,155,410,53,'#0c3440','900');
+function logoCrop(im){if(!im)return;const cx=113,cy=166,rad=77;ctx.save();ctx.beginPath();ctx.arc(cx,cy,rad,0,2*Math.PI);ctx.clip();const scale=Math.max(rad*2/im.width,rad*2/im.height),w=im.width*scale,h=im.height*scale;ctx.drawImage(im,cx-w/2,cy-h/2,w,h);ctx.restore()}
+function drawHeading(){ctx.fillStyle='#0d3542';text(state.title||'تقرير اللقاء',443,155,410,53,'#0c3440','900');
  const d=state.date?state.date.split('-').reverse().join('/'):'';
- text(state.day||'اليوم',824,133,155,24,'#0d3542');text(d,824,181,177,22,'#0d3542');
- const infos=[{x:595,w:298,k:'label1',v:'value1'},{x:310,w:262,k:'label2',v:'value2'},{x:31,w:261,k:'label3',v:'value3'}];
- infos.forEach(({x,w,k,v})=>{text(state[k],x+w/2,301,w-26,23,'#ffffff');text(state[v],x+w/2,359,w-22,24,'#0e3542')});logoCrop(logoImg)
+ text(state.day||'اليوم',804,133,155,24,'#0d3542');text(d,804,181,177,22,'#0d3542');
+ // إحداثيات مستقلة لكل بطاقة: نقل النص فقط دون تحريك الخلفية الفنية.
+ const infos=[
+   {x:595,w:298,k:'label1',v:'value1',dx:-24,dy:-10},
+   {x:310,w:262,k:'label2',v:'value2',dx:-31,dy:-12},
+   {x:31,w:261,k:'label3',v:'value3',dx:-13,dy:-8}
+ ];
+ infos.forEach(({x,w,k,v,dx,dy})=>{
+   text(state[k],x+w/2+dx,301+dy,w-26,23,'#ffffff');
+   text(state[v],x+w/2+dx,359+dy,w-22,24,'#0e3542');
+ });
+ logoCrop(logoImg)
 }
 function drawTable(){
  const students=state.students.filter(s=>s.name.trim()&&s.name.trim()!=='-').slice(0,MAX);
  const n=students.length;
- const right=911,top=442,bottom=1501, gap=6, headerH=51,headerGap=10;
- const widths=[48,200,105,90,180,113,108];
+ const right=911,top=463,bottom=1496, gap=6, headerH=51,headerGap=10;
+ const widths=[48,200,105,90,200,103,98];
  const labels=['الرقم','الاسم',state.headSurah||'السورة',state.headVerses||'الآيات',state.headNotes||'الملاحظات','الانضباط','الجائزة'];
  const positions=[];let pos=right;
  for(const w of widths){pos-=w;positions.push(pos);pos-=gap}
@@ -107,7 +116,10 @@ function drawTable(){
    drawCell(positions[0],y,widths[0],rowH,'#FCE6CD','#E6B383');
    text(i+1,positions[0]+widths[0]/2,mid,widths[0]-8,19,'#133944','700');
    if(st.absent){
-     const left=positions[6],w=positions[1]+widths[1]-left;
+     // يبقى الاسم ظاهرًا، وتندمج فقط خانات السورة والآيات والملاحظات والانضباط والجائزة.
+     drawCell(positions[1],y,widths[1],rowH,'#F6E6C7');
+     text(st.name,positions[1]+widths[1]/2,mid,widths[1]-10,Math.min(22,Math.max(14,rowH*.55)),'#143B46','700');
+     const left=positions[6],mergedRight=positions[2]+widths[2],w=mergedRight-left;
      drawCell(left,y,w,rowH,'#F9D8D3','#DD9A95');
      text('غائب',left+w/2,mid,w-20,Math.min(30,Math.max(19,rowH*.55)),'#A52E2D','800');
      continue;
