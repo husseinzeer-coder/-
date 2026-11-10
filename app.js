@@ -45,7 +45,7 @@
     }
     store();renderEditors();draw();notify(`تم استيراد ${count} طالبًا من القالب.${duplicates?' وتجاهل '+duplicates+' صف مكرر.':''} راجع التسميع وحدّد الإنجاز يدويًا.`)
   }
-  function dateChanged(){load($('date').value);renderEditors();draw();notify('تم تحميل بيانات التاريخ المحدد إن كانت محفوظة على الجهاز.')}
+  function dateChanged(){currentDate=$('date').value;store();draw();notify('تم تغيير التاريخ مع الاحتفاظ بجميع بيانات التسميع الحالية. لحذف بيانات اليوم استخدم زر التفريغ.')}
   function reset(){if(!confirm('هل تريد تفريغ بيانات هذا اليوم فقط؟'))return;records={};store();renderEditors();draw();notify('تم تفريغ بيانات هذا اليوم.')}
   async function imageBlob(){await renderer.render(currentDate,groups,records,templateId);return renderer.toBlob()}
   function filename(){return `إنجاز-التسميع-${templateId}-${currentDate||'بدون-تاريخ'}.png`}
