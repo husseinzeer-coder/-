@@ -58,12 +58,13 @@
   })}
   function saveNames(){if(!window.REPORT_TEMPLATES[templateId].editableNames)return;try{localStorage.setItem('fatima-hoffaz:v3:names:'+templateId+reportScope,JSON.stringify(all.map(s=>s.name)))}catch(e){notify('تعذر حفظ الأسماء',true)}}
   function restoreNames(){if(!window.REPORT_TEMPLATES[templateId].editableNames)return;try{const names=JSON.parse(localStorage.getItem('fatima-hoffaz:v3:names:'+templateId+reportScope)||'null');if(Array.isArray(names))all.forEach((s,i)=>{if(typeof names[i]==='string'&&names[i].trim())s.name=names[i].trim()});}catch(e){}}
-  function activate(id,legacyMode=false){
+  function activate(id,legacyMode=false,type='single12'){
     workspaceId=id;legacy=legacyMode;
+    templateId=['single12','classic'].includes(type)?type:'single12';
     reportScope=legacy?'':':'+id;
-    groups=JSON.parse(JSON.stringify(window.REPORT_TEMPLATES.single12.groups));
+    groups=JSON.parse(JSON.stringify(window.REPORT_TEMPLATES[templateId].groups));
     rebuildIndex();restoreNames();rebuildIndex();
-    storagePrefix='fatima-hoffaz-v3:single12'+reportScope+':';
+    storagePrefix='fatima-hoffaz-v3:'+templateId+reportScope+':';
     let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}
     $('date').value=last||new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'});
     load($('date').value);renderEditors();draw();
