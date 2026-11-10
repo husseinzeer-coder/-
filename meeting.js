@@ -14,7 +14,7 @@ function message(s){$('message').textContent=s}
 function save(){snapshotDay();try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){message('المساحة المحلية ممتلئة؛ قد لا تُحفظ الصورة أو البيانات.')}}
 function field(name){return String(state[name]||'')}
 const topIds=['title','day','date','label1','value1','label2','value2','label3','value3','headSurah','headVerses','headNotes'];
-for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{if(id==='date'){snapshotDay();state.date=$(id).value;loadDay(state.date);save();buildRows();render();return;}state[id]=$(id).value;save();render()})}
+for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{if(id==='date'){snapshotDay();state.date=$(id).value;save();render();message('تم تحديث تاريخ التقرير دون حذف أي من البيانات المكتوبة.');return;}state[id]=$(id).value;save();render()})}
 function count(){const filled=state.students.filter(s=>s.name.trim()&&s.name.trim()!=='-').length;$('counter').textContent=`(${filled} ظاهر / ${state.students.length} مضاف / 25 حد أقصى)`;$('addStudent').disabled=state.students.length>=MAX}
 function node(tag,cls='',value){const x=document.createElement(tag);if(cls)x.className=cls;if(value!==undefined)x.textContent=value;return x}
 function input(s,key,placeholder){const x=node('input');x.type='text';x.placeholder=placeholder;x.value=s[key]||'';x.setAttribute('aria-label',placeholder);x.addEventListener('input',()=>{s[key]=x.value;save();count();render()});return x}
