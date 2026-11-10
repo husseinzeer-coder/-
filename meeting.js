@@ -23,7 +23,7 @@ function buildRows(){const parent=$('rows');parent.replaceChildren();state.stude
  const dis=node('select');[['good','منضبط'],['bad','غير منضبط']].forEach(([v,t])=>{const o=new Option(t,v);dis.add(o)});dis.value=s.discipline;dis.addEventListener('change',()=>{s.discipline=dis.value;save();render()});
  const prize=node('div','prize');const prizeText=input(s,'award','الجائزة');const color=node('input');color.type='color';color.value=/^#[0-9a-f]{6}$/i.test(s.awardColor)?s.awardColor:'#1761b9';color.title='لون خانة الجائزة';color.addEventListener('input',()=>{s.awardColor=color.value;save();render()});prize.append(prizeText,color);
  const absent=node('label','gone');const cb=node('input');cb.type='checkbox';cb.checked=!!s.absent;cb.addEventListener('change',()=>{s.absent=cb.checked;row.classList.toggle('absent',s.absent);[surah,verses,notes,dis,prizeText,color].forEach(el=>el.disabled=s.absent);save();render()});absent.append(cb,document.createTextNode('غائب'));
- const del=node('button','remove','حذف');del.type='button';del.addEventListener('click',()=>{state.students.splice(i,1);save();buildRows();render()});
+ const del=node('button','remove','حذف');del.type='button';del.addEventListener('click',()=>{Object.values(state.days||{}).forEach(day=>{if(Array.isArray(day.students))day.students.splice(i,1)});state.students.splice(i,1);save();buildRows();render()});
  [surah,verses,notes,dis,prizeText,color].forEach(el=>el.disabled=!!s.absent);
  row.append(name,surah,verses,notes,dis,prize,absent,del);parent.append(row)});count()}
 $('addStudent').addEventListener('click',()=>{if(state.students.length>=MAX)return;state.students.push(blank());save();buildRows();render();const inputs=$('rows').querySelectorAll('.editing');inputs[inputs.length-1]?.querySelector('input')?.focus()});
@@ -33,6 +33,7 @@ $('reset').addEventListener('click',()=>{
  state.students=state.students.map(st=>({...st,...Object.fromEntries(DAY_FIELDS.map(k=>[k,blank()[k]]))}));
  save();buildRows();render();message('تم تفريغ بيانات اليوم الحالي فقط مع الاحتفاظ بكشف الأسماء والأيام الأخرى.');
 });
+$('nameList').addEventListener('paste',()=>{setTimeout(()=>{if($('nameList').value.trim())$('importNames').click()},0)});
 $('importNames').addEventListener('click',()=>{
  const names=$('nameList').value.split(/\r?\n/).map(n=>n.trim()).filter(n=>n&&n!=='-');
  if(!names.length){message('الصق اسمًا واحدًا على الأقل، وكل اسم في سطر مستقل.');return;}
