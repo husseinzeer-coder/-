@@ -4,27 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>إنجاز التسميع اليومي — تطوير القوالب</title>
-  <link rel="stylesheet" href="style.css">  
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="meeting.css">  
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#104C39">
 
+<style>
+/* واجهة مساحة العمل متعددة التقارير */
+.workspace-bar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #d8e5df;padding:12px max(16px,calc((100vw - 1320px)/2));display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 3px 12px #203b2d10}.workspace-heading{min-width:180px;flex:1 1 170px}.workspace-heading h1{font-size:20px;margin:0;color:#064839}.workspace-heading span{font-size:12px;color:#657c71}.workspace-tabs{display:flex;gap:7px;max-width:100%;overflow-x:auto;align-items:center;flex:2 1 320px;padding:5px 0}.workspace-tab{border:1px solid #cad8d1;border-radius:10px;background:#f4f7f5;color:#19493d;display:flex;align-items:center;flex:none;gap:4px;min-height:40px}.workspace-tab.active{background:#075347;color:white;border-color:#075347}.workspace-tab>button{font:inherit;cursor:pointer;border:0;background:transparent;color:inherit;padding:9px 9px}.workspace-tab .tab-close{font-size:16px;opacity:.85;padding:7px}.workspace-add,.workspace-chooser button{background:#075347;color:white;border:0;border-radius:9px;padding:11px 14px;font-weight:700;cursor:pointer}.workspace-add:disabled{opacity:.5;cursor:default}.workspace-chooser{background:#fff9f0;border:1px solid #e4c28d;border-radius:14px;max-width:840px;margin:18px auto;padding:20px}.workspace-chooser[hidden],#singlePane[hidden],#meetingPane[hidden]{display:none!important}.workspace-chooser h2{margin:0 0 12px;font-size:21px}.workspace-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.workspace-choices label{display:flex;flex-direction:column;gap:6px;font-weight:700}.workspace-choices input,.workspace-choices select{padding:12px;border-radius:8px;border:1px solid #c9d9d0;min-width:0}.workspace-chooser-actions{display:flex;gap:9px;margin-top:12px}.workspace-chooser-actions button:last-child{background:#edf1ee;color:#175044}#workspaceWarning{color:#a33524;margin:4px 0}@media(max-width:650px){.workspace-bar{position:static;padding:10px}.workspace-heading{flex:1 1 100%}.workspace-choices{grid-template-columns:1fr}.workspace-tabs{order:2;flex:1 1 100%}}
+</style>
 </head>
 <body>
-  <main class="wrap">
+  <header class="workspace-bar"><div class="workspace-heading"><h1>إدارة تقارير الحفاظ</h1><span>مساحة عمل واحدة للشعب والمراكز — حتى خمسة تقارير</span></div><div id="workspaceTabs" class="workspace-tabs" role="tablist" aria-label="التقارير المفتوحة"></div><button id="addWorkspaceTab" class="workspace-add" type="button">＋ إضافة تقرير</button></header>
+  <section id="workspaceChooser" class="workspace-chooser" hidden><h2 id="chooserTitle">إضافة تقرير</h2><div class="workspace-choices"><label>نوع القالب<select id="workspaceType"><option value="meeting">تقرير اللقاء (25 طالبًا)</option><option value="single12">تقرير التسميع (12 طالبًا)</option></select></label><label>اسم التبويب<input id="workspaceName" maxlength="45" placeholder="مثلًا: شعبة الفوارس"></label></div><div class="workspace-chooser-actions"><button id="confirmWorkspace" type="button">إنشاء التقرير</button><button id="cancelWorkspace" type="button">إلغاء</button></div><p id="workspaceWarning" role="status"></p></section>
+  <div id="singlePane" hidden><main class="wrap">
     <section class="controls">
       <div class="toolbar"><div><h1>إنجاز التسميع اليومي</h1><p>اختر القالب ثم أدخل البيانات. تقرير اللقاء بإدخال يدوي دون Google Sheets، وقالب 12 طالبًا للتسميع اليومي.</p></div><label>التاريخ <input type="date" id="date"></label></div>
-      <div class="template-choice"><label for="template">اختر قالب التقرير</label><select id="template"><option value="single12">قالب التسميع — مجموعة 12 طالبًا</option><option value="meeting">قالب تقرير اللقاء — حتى 25 طالبًا</option></select><span>يمكنك تعديل أسماء الطلاب في قالب الـ12 طالبًا وتقرير اللقاء، وكل اسم يبدأ بالرمز «-».</span></div>
       <label for="paste">بيانات Google Sheets</label>
       <textarea id="paste" placeholder="الصق الصفوف مع عناوين الأعمدة أو بدونها؛ ويمكن ترتيب الأعمدة: الاسم، الصفحات، السورة، التقييم"></textarea>
       <div class="actions">
-        <button id="newReport" class="secondary" type="button">＋ فتح تقرير مستقل جديد</button>
         <button id="import" type="button">استيراد البيانات</button>
         <button id="download" type="button">تحميل صورة PNG</button>
         <button id="share" class="secondary" type="button">مشاركة الصورة (الهاتف)</button>
         <button id="print" class="secondary" type="button">طباعة / PDF</button>
         <button id="reset" class="danger" type="button">تفريغ بيانات اليوم</button>
       </div>
-      <p class="tip">زر «فتح تقرير مستقل جديد» يفتح تبويبًا منفصلًا لشعبة أو مركز آخر، ويحفظ أسماءه وبياناته بصورة مستقلة. احتفظ بالرابط للعودة إليه لاحقًا من الجهاز نفسه.</p>
       <p id="notice" role="status" aria-live="polite"></p>
       <p class="tip">الحالات: 100% أخضر، 50% برتقالي، X أحمر، 0% أحمر، غائب بدمج الخانات، و«-» للمفصول أو المحروم. تُحفظ التعديلات محليًا لهذا اليوم فقط في هذا المتصفح.</p>
       <div class="editors" id="editors"></div>
@@ -33,10 +37,41 @@
       <h2>معاينة التقرير النهائي</h2>
       <div class="canvas-wrap"><canvas id="report" width="1620" height="971" aria-label="معاينة إنجاز التسميع اليومي"></canvas></div>
     </section>
-  </main>
+  </main></div>
+  <div id="meetingPane" hidden><main class="shell">
+<section class="panel">
+  <div class="topline"><div><h1>تقرير اللقاء — القالب الثالث</h1><p class="subtle">إدخال مباشر، حتى 25 طالبًا، وخانات قابلة للتعديل. القالب القديم ذو المجموعتين أُلغي من هذه النسخة، وبقي قالب الـ12 طالبًا.</p></div></div>
+  <div class="actions"><button id="m-download">تنزيل صورة PNG</button><button id="m-share" class="secondary">مشاركة الصورة</button><button id="m-print" class="secondary">طباعة / PDF</button><button id="m-reset" class="warn">تفريغ بيانات التقرير</button></div>
+  <p id="m-message" class="status" aria-live="polite"></p>
+  <div class="head-controls"><h2>العنوان والمعلومات العلوية</h2>
+    <div class="fields">
+      <label class="field">العنوان الرئيسي<input id="m-title" value="تقرير اللقاء" maxlength="45"></label>
+      <label class="field">اليوم<input id="m-day" placeholder="الثلاثاء" maxlength="20"></label>
+      <label class="field">التاريخ<input id="m-date" type="date"></label>
+      <label class="field">اسم الخانة الأولى<input id="m-label1" value="عنوان الدرس"></label>
+      <label class="field">محتوى الخانة الأولى<input id="m-value1" placeholder="سورة النصر"></label>
+      <label class="field">اسم الخانة الثانية<input id="m-label2" value="التسميع"></label>
+      <label class="field">محتوى الخانة الثانية<input id="m-value2" placeholder="المعارج 1–10"></label>
+      <label class="field">اسم الخانة الثالثة<input id="m-label3" value="التلقين"></label>
+      <label class="field">محتوى الخانة الثالثة<input id="m-value3" placeholder="المعارج 11–22"></label>
+    </div>
+    <div class="logo-options"><label class="field">شعار المركز (اختياري)<input id="m-logoFile" type="file" accept="image/png,image/jpeg,image/webp"></label><img class="logo-preview" id="m-logoPreview" alt="معاينة الشعار"><button class="secondary" id="m-removeLogo">حذف الشعار</button><span class="subtle">تُقصّ الصورة دائريًا تلقائيًا مع المحافظة على نسبها.</span></div>
+  </div>
+  <div class="head-controls"><h2>تعديل عناوين أعمدة الجدول</h2>
+    <div class="fields"><label class="field">السورة<input id="m-headSurah" value="السورة"></label><label class="field">الآيات<input id="m-headVerses" value="الآيات"></label><label class="field">الملاحظات<input id="m-headNotes" value="الملاحظات"></label></div>
+  </div>
+  <div class="students"><div class="students-head"><h2>بيانات الطلاب <span id="m-counter" class="subtle"></span></h2><button id="m-addStudent">+ إضافة طالب</button></div>
+  <p class="subtle">اكتب اسم الطالب أولًا ليظهر صفه في التقرير؛ الصفوف التي تحمل «-» لا تظهر في التقرير، ويزداد ارتفاع الصفوف الظاهرة تلقائيًا. الغائب يظهر بصف مدمج. لون الجائزة قابل للاختيار لكل طالب.</p>
+  <div class="rows" id="m-rows"></div></div>
+  <p class="footer">تُحفظ البيانات تلقائيًا في متصفح الجهاز، ولا تُرسل إلى خادم. لا توجد ميزة استيراد Google Sheets في هذا القالب.</p>
+</section>
+<section class="panel preview"><h2>معاينة التقرير — هي نفسها صورة PNG النهائية</h2><canvas id="m-report" width="941" height="1672" aria-label="معاينة تقرير اللقاء"></canvas></section>
+</main></div>
   <script src="students.js"></script>
   <script src="templates.js"></script>
   <script src="report.js"></script>
   <script src="app.js"></script>
+  <script src="meeting.js"></script>
+  <script src="workspace.js"></script>
 </body>
 </html>
