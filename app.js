@@ -1,9 +1,9 @@
 /* تحكم التطبيق: إدخال البيانات، الربط بالطلاب، الحفظ المحلي، تصدير الصورة. */
 (() => {
   'use strict';
-  const reportId=new URLSearchParams(location.search).get('report');const reportScope=reportId?':'+reportId:'';
+  let reportScope='',workspaceId='',legacy=false;
 
-  let templateId='single12';let groups=window.REPORT_TEMPLATES[templateId].groups;const renderer=window.ReportRenderer;
+  let templateId='single12';let groups=JSON.parse(JSON.stringify(window.REPORT_TEMPLATES[templateId].groups));const renderer=window.ReportRenderer;
   const $=id=>document.getElementById(id);
   let all=[];
   let storagePrefix='fatima-hoffaz-v3:single12'+reportScope+':';
@@ -58,8 +58,24 @@
   })}
   function saveNames(){if(!window.REPORT_TEMPLATES[templateId].editableNames)return;try{localStorage.setItem('fatima-hoffaz:v3:names:'+templateId+reportScope,JSON.stringify(all.map(s=>s.name)))}catch(e){notify('تعذر حفظ الأسماء',true)}}
   function restoreNames(){if(!window.REPORT_TEMPLATES[templateId].editableNames)return;try{const names=JSON.parse(localStorage.getItem('fatima-hoffaz:v3:names:'+templateId+reportScope)||'null');if(Array.isArray(names))all.forEach((s,i)=>{if(typeof names[i]==='string'&&names[i].trim())s.name=names[i].trim()});}catch(e){}}
-  function switchTemplate(id){templateId=id;groups=window.REPORT_TEMPLATES[id].groups;storagePrefix='fatima-hoffaz-v3:'+id+reportScope+':';rebuildIndex();restoreNames();rebuildIndex();let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}if(last)$('date').value=last;load($('date').value);renderEditors();draw();notify('القالب جاهز. التعديلات محفوظة بشكل مستقل لكل قالب.');}
-  function init(){$('newReport').addEventListener('click',()=>{const id=(crypto.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));const url=new URL('index.html',location.href);url.searchParams.set('report',id);window.open(url.href,'_blank','noopener');});const iso=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'});let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}$('date').value=last||iso;load($('date').value);
-    $('template').addEventListener('change',e=>{if(e.target.value==='meeting'){const url=new URL('meeting.html',location.href);if(reportId)url.searchParams.set('report',reportId);window.location.href=url.href;return;}switchTemplate(e.target.value);});$('date').addEventListener('change',dateChanged);$('import').addEventListener('click',importPaste);$('reset').addEventListener('click',reset);$('download').addEventListener('click',download);$('share').addEventListener('click',share);$('print').addEventListener('click',()=>window.print());renderEditors();draw();}
+  function activate(id,legacyMode=false){
+    workspaceId=id;legacy=legacyMode;
+    reportScope=legacy?'':':'+id;
+    groups=JSON.parse(JSON.stringify(window.REPORT_TEMPLATES.single12.groups));
+    rebuildIndex();restoreNames();rebuildIndex();
+    storagePrefix='fatima-hoffaz-v3:single12'+reportScope+':';
+    let last='';try{last=localStorage.getItem(storagePrefix+'lastDate')||''}catch(e){}
+    $('date').value=last||new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'});
+    load($('date').value);renderEditors();draw();
+  }
+  function init(){
+    $('date').addEventListener('change',dateChanged);
+    $('import').addEventListener('click',importPaste);
+    $('reset').addEventListener('click',reset);
+    $('download').addEventListener('click',download);
+    $('share').addEventListener('click',share);
+    $('print').addEventListener('click',()=>window.print());
+  }
+  window.MemorizationController={activate};
   init();
 })();
