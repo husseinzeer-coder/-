@@ -55,12 +55,13 @@ function drawHeading(){ctx.fillStyle='#0d3542';text(state.title||'تقرير ا�
  text(state.day||'اليوم',804,133,155,24,'#0d3542','700','center');text(d,804,181,177,22,'#0d3542','700','center');
  // إحداثيات مستقلة لكل بطاقة: نقل النص فقط دون تحريك الخلفية الفنية.
  const infos=[
-   {x:595,w:298,k:'label1',v:'value1',dx:-20,dy:-15},
-   {x:310,w:262,k:'label2',v:'value2',dx:-15,dy:-12},
-   {x:31,w:261,k:'label3',v:'value3',dx:-15,dy:-8}
+   {x:595,w:298,k:'label1',v:'value1',dx:-20,dy:-15,titleX:720},
+   {x:310,w:262,k:'label2',v:'value2',dx:-15,dy:-12,titleX:394},
+   {x:31,w:261,k:'label3',v:'value3',dx:-15,dy:-8,titleX:159}
  ];
- infos.forEach(({x,w,k,v,dx,dy})=>{
-   text(state[k],x+w/2+dx,301+dy,w-26,23,'#ffffff','700','center');
+ // العناوين مستقلة عن النصوص الداخلية؛ وسط الشرائط الزرقاء أفقيًا وعموديًا.
+ infos.forEach(({x,w,k,v,dx,dy,titleX})=>{
+   text(state[k],titleX,311,w-26,23,'#ffffff','700','center');
    text(state[v],x+w/2+dx,359+dy,w-22,24,'#0e3542');
  });
  logoCrop(logoImg)
