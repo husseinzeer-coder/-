@@ -24,8 +24,9 @@
    const shell=document.createElement('div');shell.className='workspace-tab'+(tab.id===activeId?' active':'');shell.setAttribute('role','presentation');
    const select=document.createElement('button');select.type='button';select.textContent=tab.name;select.title='فتح التقرير — انقر مرتين لإعادة التسمية';select.setAttribute('role','tab');select.setAttribute('aria-selected',String(tab.id===activeId));select.addEventListener('click',()=>activate(tab.id));
    select.addEventListener('dblclick',()=>rename(tab.id));
+   const edit=document.createElement('button');edit.type='button';edit.className='tab-close';edit.textContent='✎';edit.title='تغيير اسم التقرير';edit.setAttribute('aria-label','إعادة تسمية '+tab.name);edit.addEventListener('click',()=>rename(tab.id));
    const close=document.createElement('button');close.type='button';close.className='tab-close';close.textContent='×';close.title='حذف التقرير';close.setAttribute('aria-label','حذف '+tab.name);close.addEventListener('click',()=>remove(tab.id));
-   shell.append(select,close);box.append(shell);
+   shell.append(select,edit,close);box.append(shell);
   });
   $('addWorkspaceTab').disabled=tabs.length>=MAX;
   $('addWorkspaceTab').title=tabs.length>=MAX?'الحد الأقصى خمسة تقارير':'إضافة تقرير مستقل';
