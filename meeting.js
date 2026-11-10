@@ -5,12 +5,16 @@ let storageKey='fatima-hoffaz:meeting-v2';const MAX=25;
 const img=new Image();img.src='./meeting-background.png';
 const defaults=()=>({title:'تقرير اللقاء',day:'',date:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'}),label1:'عنوان الدرس',value1:'',label2:'التسميع',value2:'',label3:'التلقين',value3:'',headSurah:'السورة',headVerses:'الآيات',headNotes:'الملاحظات',logo:null,students:[]});
 let state=defaults(),logoImg=null,painting=0;
+const DAY_FIELDS=['surah','verses','notes','discipline','award','awardColor','absent'];
+const DAILY_TOP=['value1','value2','value3'];
+function snapshotDay(date=state.date){if(!date)return;state.days??={};state.days[date]={fields:Object.fromEntries(DAILY_TOP.map(k=>[k,state[k]])),students:state.students.map(st=>Object.fromEntries(DAY_FIELDS.map(k=>[k,st[k]])))};}
+function loadDay(date){const saved=state.days?.[date];for(const k of DAILY_TOP)state[k]=saved?.fields?.[k]??'';state.students=state.students.map((st,i)=>{const daily=saved?.students?.[i];return {...st,...Object.fromEntries(DAY_FIELDS.map(k=>[k,daily?.[k]??blank()[k]]))}});for(const k of DAILY_TOP)$(k).value=field(k)}
 const blank=()=>({name:'-',surah:'',verses:'',notes:'',discipline:'good',award:'',awardColor:'#1761b9',absent:false});
 function message(s){$('message').textContent=s}
-function save(){try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){message('المساحة المحلية ممتلئة؛ قد لا تُحفظ الصورة أو البيانات.')}}
+function save(){snapshotDay();try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){message('المساحة المحلية ممتلئة؛ قد لا تُحفظ الصورة أو البيانات.')}}
 function field(name){return String(state[name]||'')}
 const topIds=['title','day','date','label1','value1','label2','value2','label3','value3','headSurah','headVerses','headNotes'];
-for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{state[id]=$(id).value;save();render()})}
+for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{if(id==='date'){snapshotDay();state.date=$(id).value;loadDay(state.date);save();buildRows();render();return;}state[id]=$(id).value;save();render()})}
 function count(){const filled=state.students.filter(s=>s.name.trim()&&s.name.trim()!=='-').length;$('counter').textContent=`(${filled} ظاهر / ${state.students.length} مضاف / 25 حد أقصى)`;$('addStudent').disabled=state.students.length>=MAX}
 function node(tag,cls='',value){const x=document.createElement(tag);if(cls)x.className=cls;if(value!==undefined)x.textContent=value;return x}
 function input(s,key,placeholder){const x=node('input');x.type='text';x.placeholder=placeholder;x.value=s[key]||'';x.setAttribute('aria-label',placeholder);x.addEventListener('input',()=>{s[key]=x.value;save();count();render()});return x}
@@ -23,7 +27,23 @@ function buildRows(){const parent=$('rows');parent.replaceChildren();state.stude
  [surah,verses,notes,dis,prizeText,color].forEach(el=>el.disabled=!!s.absent);
  row.append(name,surah,verses,notes,dis,prize,absent,del);parent.append(row)});count()}
 $('addStudent').addEventListener('click',()=>{if(state.students.length>=MAX)return;state.students.push(blank());save();buildRows();render();const inputs=$('rows').querySelectorAll('.editing');inputs[inputs.length-1]?.querySelector('input')?.focus()});
-$('reset').addEventListener('click',()=>{if(!confirm('تفريغ بيانات التقرير الحالي والأسماء؟'))return;state=defaults();logoImg=null;topIds.forEach(id=>$(id).value=field(id));$('logoFile').value='';$('logoPreview').removeAttribute('src');save();buildRows();render();message('تم تفريغ بيانات التقرير.')});
+$('reset').addEventListener('click',()=>{
+ if(!confirm('تفريغ بيانات يوم '+(state.date||'اليوم')+' فقط؟ ستبقى أسماء الطلاب والشعار وعناوين الخانات وبيانات الأيام الأخرى محفوظة.'))return;
+ for(const k of DAILY_TOP){state[k]='';$(k).value=''}
+ state.students=state.students.map(st=>({...st,...Object.fromEntries(DAY_FIELDS.map(k=>[k,blank()[k]]))}));
+ save();buildRows();render();message('تم تفريغ بيانات اليوم الحالي فقط مع الاحتفاظ بكشف الأسماء والأيام الأخرى.');
+});
+$('importNames').addEventListener('click',()=>{
+ const names=$('nameList').value.split(/\r?\n/).map(n=>n.trim()).filter(n=>n&&n!=='-');
+ if(!names.length){message('الصق اسمًا واحدًا على الأقل، وكل اسم في سطر مستقل.');return;}
+ if(names.length>MAX){message('الحد الأقصى 25 طالبًا. القائمة تتضمن '+names.length+' اسمًا، ولم تُعدّل البيانات.');return;}
+ const hasExisting=state.students.some(st=>st.name.trim()&&st.name.trim()!=='-');
+ if(hasExisting&&!confirm('سيُستبدل كشف الأسماء الحالي ('+state.students.length+' صفًا) بالكشف الجديد، وستُفرغ بيانات الطلاب المرتبطة بالأسماء السابقة في جميع الأيام. هل تريد المتابعة؟'))return;
+ state.students=names.map(name=>({...blank(),name}));state.days={};
+ for(const k of DAILY_TOP){state[k]='';$(k).value=''}
+ save();buildRows();render();$('nameList').value='';
+ message('تم إدراج '+names.length+' طالبًا تلقائيًا من كشف الأسماء.');
+});
 function clamp(v,a,b){return Math.min(b,Math.max(a,v))}
 function text(t,x,y,max,font=24,color='#0d3542',weight='700',align='center'){t=String(t??'');ctx.save();ctx.direction='rtl';ctx.font=`${weight} ${font}px Tahoma, Arial, sans-serif`;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='middle';let n=font;while(ctx.measureText(t).width>max&&n>10){n--;ctx.font=`${weight} ${n}px Tahoma, Arial, sans-serif`;}ctx.fillText(t,x,y,max);ctx.restore()}
 function rounded(x,y,w,h,r,fill,stroke,line=1){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.stroke()}}
@@ -110,6 +130,8 @@ async function activate(tabId){
  state=defaults();logoImg=null;
  try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(saved&&typeof saved==='object')state={...state,...saved,students:Array.isArray(saved.students)?saved.students.slice(0,MAX).map(st=>({...blank(),...st})):[]}}catch(e){}
  if(!state.students.length)state.students=Array.from({length:12},()=>blank());
+ if(!state.days||typeof state.days!=='object'){state.days={};snapshotDay()}
+ loadDay(state.date);
  topIds.forEach(id=>$(id).value=field(id));
  $('logoFile').value='';$('logoPreview').removeAttribute('src');
  buildRows();render();
