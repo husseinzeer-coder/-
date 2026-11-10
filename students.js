@@ -1,17 +1,5 @@
-/* هنا تُعدّل أسماء الطلاب ومجموعاتهم. حافظ على id ثابتًا عند تغيير الاسم. */
-window.STUDENT_GROUPS = [
-  { id: 1, title: 'المجموعة 1', students: [
-    { id:'omar-m', name:'عمر مملوك', aliases:['عمر المملوك','عمر المملوك','عمرملوك'] },
-    { id:'taleb', name:'طالب', aliases:['طالب عودة','طالب عاصم'] },
-    { id:'abd-rahman', name:'عبدالرحمن', aliases:['عبدالرحمن العظمات','عبدالرحمن عظمات'] },
-    { id:'omar-k', name:'عمر الخطيب', aliases:[] },
-    { id:'abd-hadi', name:'عبدالهادي', aliases:['عبدالهادي الحكواتي','عبدالهادي الحكواتي'] }
-  ]},
-  { id: 2, title: 'المجموعة 2', students: [
-    { id:'osama', name:'أسامة', aliases:['أسامة البظ','اسامة البظ'] },
-    { id:'izz', name:'عزالدين', aliases:['عز الدين','عز الدين قطامي','عزالدين قطامي'] },
-    { id:'abdullah', name:'عبدالله', aliases:['عبد الله','عبدالله حجير','عبد الله حجير'] },
-    { id:'yousef', name:'يوسف', aliases:['يوسف الخطيب'] },
-    { id:'moh-k', name:'محمد الخطيب', aliases:[] }
-  ]}
+/* بيانات افتراضية عامة: لا يحتوي هذا الملف على أي أسماء أشخاص. */
+window.STUDENT_GROUPS=[
+  {id:1,title:'المجموعة الأولى',students:Array.from({length:6},(_,i)=>({id:'group-1-'+(i+1),name:'-',aliases:[]}))},
+  {id:2,title:'المجموعة الثانية',students:Array.from({length:6},(_,i)=>({id:'group-2-'+(i+1),name:'-',aliases:[]}))}
 ];
