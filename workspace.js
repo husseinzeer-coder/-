@@ -10,7 +10,7 @@
  const warn=t=>{$('workspaceWarning').textContent=t};
  const newId=()=>typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
  function initData(){
-  try{const saved=JSON.parse(safeGet(META)||'null');if(Array.isArray(saved))tabs=saved.filter(t=>t&&typeof t.id==='string'&&['meeting','single12'].includes(t.type)&&typeof t.name==='string').slice(0,MAX).map(t=>({id:t.id,type:t.type,name:t.name.slice(0,45),legacy:!!t.legacy}));}catch(e){}
+  try{const saved=JSON.parse(safeGet(META)||'null');if(Array.isArray(saved))tabs=saved.filter(t=>t&&typeof t.id==='string'&&['meeting','single12','classic'].includes(t.type)&&typeof t.name==='string').slice(0,MAX).map(t=>({id:t.id,type:t.type,name:t.name.slice(0,45),legacy:!!t.legacy}));}catch(e){}
   if(!tabs.length){
    const oldMeeting=safeGet('fatima-hoffaz:meeting-v2');
    const oldMem=safeGet('fatima-hoffaz-v3:single12:lastDate')||safeGet('fatima-hoffaz:v3:names:single12');
@@ -34,9 +34,9 @@
  function activate(id){
   const tab=tabs.find(t=>t.id===id);if(!tab)return;
   activeId=id;
-  Object.entries(panes).forEach(([type,el])=>el.hidden=type!==tab.type);
+  Object.entries(panes).forEach(([type,el])=>el.hidden=(tab.type==='meeting'?type!=='meeting':type!=='single12'));
   if(tab.type==='meeting')window.MeetingController.activate(tab.legacy?'legacy-meeting':tab.id);
-  else window.MemorizationController.activate(tab.legacy?'legacy-single12':tab.id,tab.legacy);
+  else window.MemorizationController.activate(tab.legacy?'legacy-single12':tab.id,tab.legacy,tab.type);
   saveMeta();refreshTabs();
   document.title=tab.name+' — إدارة تقارير الحفاظ';
  }
@@ -52,8 +52,8 @@
  function add(){
   if(tabs.length>=MAX)return warn('لا يمكن تجاوز خمسة تقارير');
   const type=$('workspaceType').value;
-  if(!['meeting','single12'].includes(type))return;
-  const name=$('workspaceName').value.trim().slice(0,45)||(type==='meeting'?'تقرير اللقاء':'إنجاز التسميع');
+  if(!['meeting','single12','classic'].includes(type))return;
+  const name=$('workspaceName').value.trim().slice(0,45)||(type==='meeting'?'تقرير اللقاء':type==='classic'?'تسميع مجموعتين':'إنجاز التسميع');
   const tab={id:newId(),type,name,legacy:false};
   tabs.push(tab);$('workspaceChooser').hidden=true;activate(tab.id);
  }
@@ -69,9 +69,9 @@
    for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(tab.type==='meeting'&&k===(tab.legacy?'fatima-hoffaz:meeting-v2':'fatima-hoffaz:workspace:meeting:'+tab.id))keys.push(k);
-    if(tab.type==='single12'){
-     const prefix='fatima-hoffaz-v3:single12'+(tab.legacy?'':':'+tab.id)+':';
-     if(k.startsWith(prefix)||k==='fatima-hoffaz:v3:names:single12'+(tab.legacy?'':':'+tab.id))keys.push(k);
+    if(tab.type==='single12'||tab.type==='classic'){
+     const prefix='fatima-hoffaz-v3:'+tab.type+(tab.legacy?'':':'+tab.id)+':';
+     if(k.startsWith(prefix)||k==='fatima-hoffaz:v3:names:'+tab.type+(tab.legacy?'':':'+tab.id))keys.push(k);
     }
    }
    keys.forEach(k=>localStorage.removeItem(k));
@@ -91,10 +91,10 @@
   const data={version:1,tabs,last:activeId,storage:{}};
   try{
    for(const t of tabs){
-    const prefix=t.type==='meeting'?(t.legacy?'fatima-hoffaz:meeting-v2':'fatima-hoffaz:workspace:meeting:'+t.id):'fatima-hoffaz-v3:single12'+(t.legacy?'':':'+t.id)+':';
+    const prefix=t.type==='meeting'?(t.legacy?'fatima-hoffaz:meeting-v2':'fatima-hoffaz:workspace:meeting:'+t.id):'fatima-hoffaz-v3:'+t.type+(t.legacy?'':':'+t.id)+':';
     for(let i=0;i<localStorage.length;i++){
      const k=localStorage.key(i);
-     if(k===prefix||t.type==='single12'&&(k.startsWith(prefix)||k==='fatima-hoffaz:v3:names:single12'+(t.legacy?'':':'+t.id)))data.storage[k]=localStorage.getItem(k);
+     if(k===prefix||t.type!=='meeting'&&(k.startsWith(prefix)||k==='fatima-hoffaz:v3:names:'+t.type+(t.legacy?'':':'+t.id)))data.storage[k]=localStorage.getItem(k);
     }
    }
    const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
@@ -108,7 +108,7 @@
    const data=JSON.parse(await file.text());
    if(data.version!==1||!Array.isArray(data.tabs)||!data.storage||typeof data.storage!=='object')throw Error('صيغة النسخة الاحتياطية غير صحيحة');
    if(data.tabs.length>MAX)throw Error('النسخة تحتوي على أكثر من خمسة تقارير');
-   const valid=data.tabs.every(t=>t&&typeof t.id==='string'&&typeof t.name==='string'&&['meeting','single12'].includes(t.type)&&t.id.length<140);
+   const valid=data.tabs.every(t=>t&&typeof t.id==='string'&&typeof t.name==='string'&&['meeting','single12','classic'].includes(t.type)&&t.id.length<140);
    if(!valid)throw Error('بيانات تبويبات غير صالحة');
    if(!confirm('استعادة النسخة الاحتياطية ستستبدل قائمة التقارير الحالية. يفضل تصدير نسخة أولًا. هل تريد المتابعة؟'))return;
    const previous=[...tabs];previous.forEach(clearTabStorage);
