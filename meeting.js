@@ -55,13 +55,14 @@ function drawHeading(){ctx.fillStyle='#0d3542';text(state.title||'تقرير ا�
  text(state.day||'اليوم',804,133,155,24,'#0d3542','700','center');text(d,804,181,177,22,'#0d3542','700','center');
  // إحداثيات مستقلة لكل بطاقة: نقل النص فقط دون تحريك الخلفية الفنية.
  const infos=[
-   {x:595,w:298,k:'label1',v:'value1',dx:-20,dy:-15,titleX:720},
-   {x:310,w:262,k:'label2',v:'value2',dx:-15,dy:-12,titleX:394},
-   {x:31,w:261,k:'label3',v:'value3',dx:-15,dy:-8,titleX:159}
+   {x:595,w:298,k:'label1',v:'value1',dx:-20,dy:-15,titleX:704,titleY:312,titleWidth:212,titleSize:22},
+   {x:310,w:262,k:'label2',v:'value2',dx:-15,dy:-12,titleX:365,titleY:312,titleWidth:125,titleSize:20},
+   {x:31,w:261,k:'label3',v:'value3',dx:-15,dy:-8,titleX:135,titleY:312,titleWidth:130,titleSize:20}
  ];
- // العناوين مستقلة عن النصوص الداخلية؛ وسط الشرائط الزرقاء أفقيًا وعموديًا.
- infos.forEach(({x,w,k,v,dx,dy,titleX})=>{
-   text(state[k],titleX,311,w-26,23,'#ffffff','700','center');
+ // إحداثيات العناوين مأخوذة من مراكز الشرائط الزرقاء وليس من مراكز البطاقات البيضاء.
+ // كما يُقيَّد عرض النص بعرض الشريط حتى لا يخرج إلى الإطار البرتقالي.
+ infos.forEach(({x,w,k,v,dx,dy,titleX,titleY,titleWidth,titleSize})=>{
+   text(state[k],titleX,titleY,titleWidth,titleSize,'#ffffff','700','center');
    text(state[v],x+w/2+dx,359+dy,w-22,24,'#0e3542');
  });
  logoCrop(logoImg)
