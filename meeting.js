@@ -50,14 +50,14 @@ function text(t,x,y,max,font=24,color='#0d3542',weight='700',align='center'){t=S
 function rounded(x,y,w,h,r,fill,stroke,line=1){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.stroke()}}
 async function loadLogo(data){if(!data)return null;return await new Promise(resolve=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=data})}
 function logoCrop(im){if(!im)return;const cx=113,cy=166,rad=77;ctx.save();ctx.beginPath();ctx.arc(cx,cy,rad,0,2*Math.PI);ctx.clip();const scale=Math.max(rad*2/im.width,rad*2/im.height),w=im.width*scale,h=im.height*scale;ctx.drawImage(im,cx-w/2,cy-h/2,w,h);ctx.restore()}
-function drawHeading(){ctx.fillStyle='#0d3542';text(state.title||'تقرير اللقاء',443,155,410,53,'#0c3440','900','center');
+function drawHeading(){ctx.fillStyle='#0d3542';text(state.title||'تقرير اللقاء',443,153,410,53,'#0c3440','900','center');
  const d=state.date?state.date.split('-').reverse().join('/'):'';
  text(state.day||'اليوم',804,133,155,24,'#0d3542','700','center');text(d,804,181,177,22,'#0d3542','700','center');
  // إحداثيات مستقلة لكل بطاقة: نقل النص فقط دون تحريك الخلفية الفنية.
  const infos=[
-   {x:595,w:298,k:'label1',v:'value1',dx:-24,dy:-10},
-   {x:310,w:262,k:'label2',v:'value2',dx:-31,dy:-12},
-   {x:31,w:261,k:'label3',v:'value3',dx:-13,dy:-8}
+   {x:595,w:298,k:'label1',v:'value1',dx:-20,dy:-15},
+   {x:310,w:262,k:'label2',v:'value2',dx:-15,dy:-12},
+   {x:31,w:261,k:'label3',v:'value3',dx:-15,dy:-8}
  ];
  infos.forEach(({x,w,k,v,dx,dy})=>{
    text(state[k],x+w/2+dx,301+dy,w-26,23,'#ffffff','700','center');
