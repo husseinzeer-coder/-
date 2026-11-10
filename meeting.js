@@ -55,7 +55,7 @@ function drawHeading(){ctx.fillStyle='#0d3542';text(state.title||'تقرير ا�
  text(state.day||'اليوم',804,133,155,24,'#0d3542','700','center');text(d,804,181,177,22,'#0d3542','700','center');
  // إحداثيات مستقلة لكل بطاقة: نقل النص فقط دون تحريك الخلفية الفنية.
  const infos=[
-   {x:595,w:298,k:'label1',v:'value1',dx:-20,dy:-15,titleX:704,titleY:322,titleWidth:212,titleSize:22},
+   {x:595,w:298,k:'label1',v:'value1',dx:-20,dy:-15,titleX:704,titleY:352,titleWidth:212,titleSize:22},
    {x:310,w:262,k:'label2',v:'value2',dx:-15,dy:-12,titleX:365,titleY:312,titleWidth:125,titleSize:20},
    {x:31,w:261,k:'label3',v:'value3',dx:-15,dy:-8,titleX:135,titleY:312,titleWidth:130,titleSize:20}
  ];
