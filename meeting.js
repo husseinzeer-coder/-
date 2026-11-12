@@ -38,7 +38,9 @@ function message(s){$('message').textContent=s}
 function save(){snapshotDay();try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){message('المساحة المحلية ممتلئة؛ قد لا تُحفظ الصورة أو البيانات.')}}
 function field(name){return String(state[name]||'')}
 const topIds=['title','day','date','label1','value1','label2','value2','label3','value3','headSurah','headVerses','headNotes'];
-$('theme').addEventListener('change',()=>{state.theme=$('theme').value;save();updateBackground()});
+const themeButtons=[...document.querySelectorAll('#meetingPane .meeting-theme-button')];
+function syncThemeButtons(){for(const b of themeButtons)b.setAttribute('aria-pressed',String(b.dataset.theme===(THEME_IMAGES[state.theme]?state.theme:'orange')))}
+for(const b of themeButtons)b.addEventListener('click',()=>{const choice=b.dataset.theme;if(!THEME_IMAGES[choice])return;state.theme=choice;syncThemeButtons();save();updateBackground()});
 for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{if(id==='date'){snapshotDay();state.date=$(id).value;save();render();message('تم تحديث تاريخ التقرير دون حذف أي من البيانات المكتوبة.');return;}state[id]=$(id).value;save();render()})}
 function count(){const filled=state.students.filter(s=>s.name.trim()&&s.name.trim()!=='-').length;$('counter').textContent=`(${filled} ظاهر / ${state.students.length} مضاف / 25 حد أقصى)`;$('addStudent').disabled=state.students.length>=MAX}
 function node(tag,cls='',value){const x=document.createElement(tag);if(cls)x.className=cls;if(value!==undefined)x.textContent=value;return x}
@@ -162,7 +164,7 @@ async function activate(tabId){
  if(!state.days||typeof state.days!=='object'){state.days={};snapshotDay()}
  loadDay(state.date);
  topIds.forEach(id=>$(id).value=field(id));
- $('theme').value=THEME_IMAGES[state.theme]?state.theme:'orange';
+ syncThemeButtons();
  updateBackground();
  $('logoFile').value='';$('logoPreview').removeAttribute('src');
  buildRows();render();
