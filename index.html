@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="meeting.css">  
   <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./bakgrounds/icon-192.png">
+  <link rel="apple-touch-icon" href="./bakgrounds/icon-192.png">
   <meta name="theme-color" content="#104C39">
 
 <style>
@@ -75,5 +77,14 @@
   <script src="app.js"></script>
   <script src="meeting.js"></script>
   <script src="workspace.js"></script>
+  <script>
+  // تسجيل عامل الخدمة دون المساس ببيانات التقارير الموجودة في localStorage.
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+        .catch(error => console.warn('تعذر تفعيل التشغيل دون اتصال:', error));
+    });
+  }
+  </script>
 </body>
 </html>
