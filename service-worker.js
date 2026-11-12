@@ -1,5 +1,5 @@
 /* Halaqaty PWA: cache the app shell, prefer fresh pages when online. */
-const CACHE='halaqaty-shell-v1';
+const CACHE='halaqaty-shell-v2';
 const SHELL=[
  './','./index.html','./style.css','./meeting.css',
  './students.js','./templates.js','./report.js','./app.js','./meeting.js','./workspace.js',
