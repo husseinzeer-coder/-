@@ -2,8 +2,32 @@
 (()=>{'use strict';
 const $=id=>document.getElementById('m-'+id),canvas=$('report'),ctx=canvas.getContext('2d');
 let storageKey='fatima-hoffaz:meeting-v2';const MAX=25;
-const img=new Image();img.src='./meeting-background.png';
-const defaults=()=>({title:'تقرير اللقاء',day:'',date:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'}),label1:'عنوان الدرس',value1:'',label2:'التسميع',value2:'',label3:'التلقين',value3:'',headSurah:'السورة',headVerses:'الآيات',headNotes:'الملاحظات',logo:null,students:[]});
+const THEME_IMAGES={
+ orange:'./bakgrounds/meeting-background.png',
+ green:'./bakgrounds/quran_template_02_emerald_gold.png',
+ blue:'./bakgrounds/quran_template_01_turquoise_navy.png',
+ burgundy:'./bakgrounds/quran_template_03_burgundy_gold.png'
+};
+const THEME_COLORS={
+ orange:{header:'#F7AD5D',headerStroke:'#E88720',heading:'#153746',name:'#F6E6C7',number:'#FCE6CD',rowA:'#FFFBF4',rowB:'#FFF4E6',stroke:'#E4BA83',absent:'#F9D8D3'},
+ green:{header:'#B99452',headerStroke:'#97753E',heading:'#173E31',name:'#EEE1C4',number:'#F4E9D7',rowA:'#FCFBF6',rowB:'#F3F6EE',stroke:'#B7AC87',absent:'#F9D8D3'},
+ blue:{header:'#5FA9A8',headerStroke:'#3A7782',heading:'#112F40',name:'#D7E8E9',number:'#DCECED',rowA:'#FBFDFD',rowB:'#EEF5F6',stroke:'#93B7BC',absent:'#F9D8D3'},
+ burgundy:{header:'#C2A15A',headerStroke:'#9E7639',heading:'#4A252A',name:'#EFE0D7',number:'#F2E4DC',rowA:'#FFFDFC',rowB:'#F7EFF0',stroke:'#C8ABAC',absent:'#F9D8D3'}
+};
+const backgroundCache=new Map();
+let backgroundImage=null,backgroundToken=0;
+function updateBackground(){
+ const theme=THEME_IMAGES[state.theme]?state.theme:'orange';
+ const path=THEME_IMAGES[theme],token=++backgroundToken;
+ if(!backgroundCache.has(path)){
+  backgroundCache.set(path,new Promise((resolve,reject)=>{
+   const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('تعذر تحميل الخلفية '+path));im.src=path;
+  }));
+ }
+ backgroundImage=null;render();
+ backgroundCache.get(path).then(im=>{if(token!==backgroundToken)return;backgroundImage=im;render()}).catch(e=>{if(token!==backgroundToken)return;message(e.message)});
+}
+const defaults=()=>({title:'تقرير اللقاء',day:'',date:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Amman'}),label1:'عنوان الدرس',value1:'',label2:'التسميع',value2:'',label3:'التلقين',value3:'',headSurah:'السورة',headVerses:'الآيات',headNotes:'الملاحظات',theme:'orange',logo:null,students:[]});
 let state=defaults(),logoImg=null,painting=0;
 const DAY_FIELDS=['surah','verses','notes','discipline','award','awardColor','absent'];
 const DAILY_TOP=['value1','value2','value3'];
@@ -14,6 +38,7 @@ function message(s){$('message').textContent=s}
 function save(){snapshotDay();try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){message('المساحة المحلية ممتلئة؛ قد لا تُحفظ الصورة أو البيانات.')}}
 function field(name){return String(state[name]||'')}
 const topIds=['title','day','date','label1','value1','label2','value2','label3','value3','headSurah','headVerses','headNotes'];
+$('theme').addEventListener('change',()=>{state.theme=$('theme').value;save();updateBackground()});
 for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{if(id==='date'){snapshotDay();state.date=$(id).value;save();render();message('تم تحديث تاريخ التقرير دون حذف أي من البيانات المكتوبة.');return;}state[id]=$(id).value;save();render()})}
 function count(){const filled=state.students.filter(s=>s.name.trim()&&s.name.trim()!=='-').length;$('counter').textContent=`(${filled} ظاهر / ${state.students.length} مضاف / 25 حد أقصى)`;$('addStudent').disabled=state.students.length>=MAX}
 function node(tag,cls='',value){const x=document.createElement(tag);if(cls)x.className=cls;if(value!==undefined)x.textContent=value;return x}
@@ -75,12 +100,13 @@ function drawTable(){
  const labels=['الرقم','الاسم',state.headSurah||'السورة',state.headVerses||'الآيات',state.headNotes||'الملاحظات','الانضباط','الجائزة'];
  const positions=[];let pos=right;
  for(const w of widths){pos-=w;positions.push(pos);pos-=gap}
- const drawCell=(x,y,w,h,fill,stroke='#E4BA83',r=7)=>{
+ const palette=THEME_COLORS[state.theme]||THEME_COLORS.orange;
+ const drawCell=(x,y,w,h,fill,stroke=palette.stroke,r=7)=>{
    rounded(x,y,w,h,Math.min(r,h/4),fill,stroke,1.05);
  };
  for(let j=0;j<7;j++){
-   drawCell(positions[j],top,widths[j],headerH,'#F7AD5D','#E88720',8);
-   text(labels[j],positions[j]+widths[j]/2,top+headerH/2,widths[j]-10,20,'#153746','800','center');
+   drawCell(positions[j],top,widths[j],headerH,palette.header,palette.headerStroke,8);
+   text(labels[j],positions[j]+widths[j]/2,top+headerH/2,widths[j]-10,20,palette.heading,'800','center');
  }
  const startY=top+headerH+headerGap;
  const usable=bottom-startY;
@@ -88,22 +114,22 @@ function drawTable(){
  const rowH=n?Math.min(83,(usable-(n-1)*rowGap)/n):0;
  for(let i=0;i<n;i++){
    const st=students[i],y=startY+i*(rowH+rowGap),mid=y+rowH/2;
-   const background=i%2===0?'#FFFBF4':'#FFF4E6';
-   drawCell(positions[0],y,widths[0],rowH,'#FCE6CD','#E6B383');
+   const background=i%2===0?palette.rowA:palette.rowB;
+   drawCell(positions[0],y,widths[0],rowH,palette.number,palette.stroke);
    text(i+1,positions[0]+widths[0]/2,mid,widths[0]-8,19,'#133944','700');
    if(st.absent){
      // يبقى الاسم ظاهرًا، وتندمج فقط خانات السورة والآيات والملاحظات والانضباط والجائزة.
-     drawCell(positions[1],y,widths[1],rowH,'#F6E6C7');
+     drawCell(positions[1],y,widths[1],rowH,palette.name);
      text(st.name,positions[1]+widths[1]/2,mid,widths[1]-10,Math.min(22,Math.max(14,rowH*.55)),'#143B46','700');
      const left=positions[6],mergedRight=positions[2]+widths[2],w=mergedRight-left;
-     drawCell(left,y,w,rowH,'#F9D8D3','#DD9A95');
+     drawCell(left,y,w,rowH,palette.absent,'#DD9A95');
      text('غائب',left+w/2,mid,w-20,Math.min(30,Math.max(19,rowH*.55)),'#A52E2D','800');
      continue;
    }
    const values=[st.name,st.surah,st.verses,st.notes,st.discipline==='bad'?'غير منضبط':'منضبط',st.award];
    for(let j=1;j<7;j++){
      let fill=background,fg='#143B46',size=j===1?22:19;
-     if(j===1){fill='#F6E6C7';size=22}
+     if(j===1){fill=palette.name;size=22}
      if(j===5){fill=st.discipline==='bad'?'#F3C4C1':'#BFDFC6';fg=st.discipline==='bad'?'#9D2928':'#185B37';size=17}
      if(j===6&&st.award.trim()){fill=st.awardColor||'#1761b9';fg='#FFFFFF'}
      drawCell(positions[j],y,widths[j],rowH,fill);
@@ -117,15 +143,15 @@ function drawTable(){
  }
  if(!n)text('أدخل أسماء الطلاب لتظهر خاناتهم هنا',471,650,720,29,'#728982','600');
 }
-function render(){const version=++painting;ctx.clearRect(0,0,941,1672);if(img.complete&&img.naturalWidth)ctx.drawImage(img,0,0,941,1672);else{ctx.fillStyle='#fff9f0';ctx.fillRect(0,0,941,1672)}drawHeading();drawTable()}
-img.onload=render;img.onerror=()=>message('تعذر تحميل خلفية التقرير. تأكد من وجود meeting-background.png');
+function render(){const version=++painting;ctx.clearRect(0,0,941,1672);if(backgroundImage)ctx.drawImage(backgroundImage,0,0,941,1672);else{ctx.fillStyle='#fff9f0';ctx.fillRect(0,0,941,1672)}drawHeading();drawTable()}
+
 async function setLogo(data){state.logo=data;logoImg=await loadLogo(data);$('logoPreview').src=data||'';if(!data)$('logoPreview').removeAttribute('src');save();render()}
 $('logoFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>8*1024*1024){message('اختر شعارًا أقل من 8 ميغابايت');return}const reader=new FileReader();reader.onload=async()=>{const im=await loadLogo(reader.result);if(!im){message('تعذر قراءة الصورة');return}const c=document.createElement('canvas');c.width=c.height=360;const q=c.getContext('2d');const sc=Math.max(360/im.width,360/im.height);q.drawImage(im,(360-im.width*sc)/2,(360-im.height*sc)/2,im.width*sc,im.height*sc);await setLogo(c.toDataURL('image/jpeg',.86));message('تمت إضافة الشعار وقصه ليتناسب مع الدائرة.')};reader.readAsDataURL(file)});
 $('removeLogo').addEventListener('click',()=>{$('logoFile').value='';setLogo(null)});
 function blob(){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('فشل إنشاء PNG')),'image/png'))}
 function filename(){return 'تقرير-اللقاء-'+(state.date||'بدون-تاريخ')+'.png'}
 function downloadFile(b){const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename();document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000)}
-$('download').addEventListener('click',async()=>{try{if(!img.complete||!img.naturalWidth)throw Error('الخلفية لم تُحمّل بعد');render();downloadFile(await blob());message('تم تجهيز صورة PNG.')}catch(e){message(e.message)}});
+$('download').addEventListener('click',async()=>{try{if(!backgroundImage)throw Error('الخلفية لم تُحمّل بعد');render();downloadFile(await blob());message('تم تجهيز صورة PNG.')}catch(e){message(e.message)}});
 $('share').addEventListener('click',async()=>{try{render();const b=await blob(),file=new File([b],filename(),{type:'image/png'});if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file],title:'تقرير اللقاء'});else downloadFile(b)}catch(e){if(e.name!=='AbortError')message(e.message)}});
 $('print').addEventListener('click',async()=>{render();window.print()});
 async function activate(tabId){
@@ -136,6 +162,8 @@ async function activate(tabId){
  if(!state.days||typeof state.days!=='object'){state.days={};snapshotDay()}
  loadDay(state.date);
  topIds.forEach(id=>$(id).value=field(id));
+ $('theme').value=THEME_IMAGES[state.theme]?state.theme:'orange';
+ updateBackground();
  $('logoFile').value='';$('logoPreview').removeAttribute('src');
  buildRows();render();
  if(state.logo){const forKey=storageKey;const im=await loadLogo(state.logo);if(storageKey!==forKey)return;logoImg=im;if(im)$('logoPreview').src=state.logo;render()}
