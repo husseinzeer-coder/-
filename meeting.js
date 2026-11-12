@@ -38,21 +38,57 @@ function message(s){$('message').textContent=s}
 function save(){snapshotDay();try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){message('المساحة المحلية ممتلئة؛ قد لا تُحفظ الصورة أو البيانات.')}}
 function field(name){return String(state[name]||'')}
 const topIds=['title','day','date','label1','value1','label2','value2','label3','value3','headSurah','headVerses','headNotes'];
+function caption(value,fallback){const t=String(value||'').trim();return t||fallback}
+function syncInputLabels(){
+  for(const [num,fallback] of [[1,'عنوان الدرس'],[2,'التسميع'],[3,'التلقين']]){
+    const title=caption(state['label'+num],fallback);
+    $('valueLabel'+num).textContent=title;
+    $('value'+num).setAttribute('aria-label',title);
+  }
+}
+function syncRowLabels(){
+ const labels=[caption(state.headSurah,'السورة'),caption(state.headVerses,'الآيات'),caption(state.headNotes,'الملاحظات')];
+ const rows=$('rows').querySelectorAll('.editing');
+ for(const row of rows){
+  const cells=row.querySelectorAll('input[data-column]');
+  for(const cell of cells){const index=Number(cell.dataset.column);if(index>=0&&index<3){cell.placeholder=labels[index];cell.setAttribute('aria-label',labels[index]);cell.title=labels[index]}}
+ }
+}
 const themeButtons=[...document.querySelectorAll('#meetingPane .meeting-theme-button')];
 function syncThemeButtons(){for(const b of themeButtons)b.setAttribute('aria-pressed',String(b.dataset.theme===(THEME_IMAGES[state.theme]?state.theme:'orange')))}
 for(const b of themeButtons)b.addEventListener('click',()=>{const choice=b.dataset.theme;if(!THEME_IMAGES[choice])return;state.theme=choice;syncThemeButtons();save();updateBackground()});
-for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{if(id==='date'){snapshotDay();state.date=$(id).value;save();render();message('تم تحديث تاريخ التقرير دون حذف أي من البيانات المكتوبة.');return;}state[id]=$(id).value;save();render()})}
+for(const id of topIds){$(id).value=field(id);$(id).addEventListener('input',()=>{if(id==='date'){snapshotDay();state.date=$(id).value;save();render();message('تم تحديث تاريخ التقرير دون حذف أي من البيانات المكتوبة.');return;}state[id]=$(id).value;if(id.startsWith('label'))syncInputLabels();if(id.startsWith('head'))syncRowLabels();save();render()})}
 function count(){const filled=state.students.filter(s=>s.name.trim()&&s.name.trim()!=='-').length;$('counter').textContent=`(${filled} ظاهر / ${state.students.length} مضاف / 25 حد أقصى)`;$('addStudent').disabled=state.students.length>=MAX}
 function node(tag,cls='',value){const x=document.createElement(tag);if(cls)x.className=cls;if(value!==undefined)x.textContent=value;return x}
 function input(s,key,placeholder){const x=node('input');x.type='text';x.placeholder=placeholder;x.value=s[key]||'';x.setAttribute('aria-label',placeholder);x.addEventListener('input',()=>{s[key]=x.value;save();count();render()});return x}
 function buildRows(){const parent=$('rows');parent.replaceChildren();state.students.forEach((s,i)=>{const row=node('div','editing'+(s.absent?' absent':''));row.append(node('span','num',String(i+1)));
- const name=input(s,'name','اسم الطالب');const surah=input(s,'surah','السورة');const verses=input(s,'verses','الآيات');const notes=input(s,'notes','الملاحظات');
+ const name=input(s,'name','اسم الطالب');
+ const surah=input(s,'surah',caption(state.headSurah,'السورة'));surah.dataset.column='0';
+ const verses=input(s,'verses',caption(state.headVerses,'الآيات'));verses.dataset.column='1';
+ const notes=input(s,'notes',caption(state.headNotes,'الملاحظات'));notes.dataset.column='2';
  const dis=node('select');[['good','منضبط'],['bad','غير منضبط']].forEach(([v,t])=>{const o=new Option(t,v);dis.add(o)});dis.value=s.discipline;dis.addEventListener('change',()=>{s.discipline=dis.value;save();render()});
  const prize=node('div','prize');const prizeText=input(s,'award','الجائزة');const color=node('input');color.type='color';color.value=/^#[0-9a-f]{6}$/i.test(s.awardColor)?s.awardColor:'#1761b9';color.title='لون خانة الجائزة';color.addEventListener('input',()=>{s.awardColor=color.value;save();render()});prize.append(prizeText,color);
  const absent=node('label','gone');const cb=node('input');cb.type='checkbox';cb.checked=!!s.absent;cb.addEventListener('change',()=>{s.absent=cb.checked;row.classList.toggle('absent',s.absent);[surah,verses,notes,dis,prizeText,color].forEach(el=>el.disabled=s.absent);save();render()});absent.append(cb,document.createTextNode('غائب'));
  const del=node('button','remove','حذف');del.type='button';del.addEventListener('click',()=>{Object.values(state.days||{}).forEach(day=>{if(Array.isArray(day.students))day.students.splice(i,1)});state.students.splice(i,1);save();buildRows();render()});
  [surah,verses,notes,dis,prizeText,color].forEach(el=>el.disabled=!!s.absent);
- row.append(name,surah,verses,notes,dis,prize,absent,del);parent.append(row)});count()}
+ const movement=node('div','row-move');
+ const up=node('button','move-up','↑');up.type='button';up.title='رفع الطالب للأعلى';up.setAttribute('aria-label','رفع '+s.name+' للأعلى');up.disabled=i===0;up.addEventListener('click',()=>moveStudent(i,-1));
+ const down=node('button','move-down','↓');down.type='button';down.title='خفض الطالب للأسفل';down.setAttribute('aria-label','خفض '+s.name+' للأسفل');down.disabled=i===state.students.length-1;down.addEventListener('click',()=>moveStudent(i,1));
+ movement.append(up,down);
+ row.append(name,surah,verses,notes,dis,prize,absent,movement,del);parent.append(row)});count()}
+function moveStudent(index,offset){
+ const target=index+offset;if(target<0||target>=state.students.length)return;
+ // بيانات الطلاب اليومية محفوظة حسب ترتيب القائمة، لذلك ننقل سجل كل يوم مع الطالب.
+ snapshotDay();
+ [state.students[index],state.students[target]]=[state.students[target],state.students[index]];
+ for(const day of Object.values(state.days||{})){
+   if(Array.isArray(day.students)){
+     [day.students[index],day.students[target]]=[day.students[target],day.students[index]];
+   }
+ }
+ save();buildRows();render();
+}
+$('toggleRoster').addEventListener('click',()=>{const region=$('rosterDetails');region.hidden=!region.hidden;$('toggleRoster').setAttribute('aria-expanded',String(!region.hidden))});
 $('addStudent').addEventListener('click',()=>{if(state.students.length>=MAX)return;state.students.push(blank());save();buildRows();render();const inputs=$('rows').querySelectorAll('.editing');inputs[inputs.length-1]?.querySelector('input')?.focus()});
 $('reset').addEventListener('click',()=>{
  if(!confirm('تفريغ بيانات يوم '+(state.date||'اليوم')+' فقط؟ ستبقى أسماء الطلاب والشعار وعناوين الخانات وبيانات الأيام الأخرى محفوظة.'))return;
@@ -164,6 +200,7 @@ async function activate(tabId){
  if(!state.days||typeof state.days!=='object'){state.days={};snapshotDay()}
  loadDay(state.date);
  topIds.forEach(id=>$(id).value=field(id));
+ syncInputLabels();
  syncThemeButtons();
  updateBackground();
  $('logoFile').value='';$('logoPreview').removeAttribute('src');
