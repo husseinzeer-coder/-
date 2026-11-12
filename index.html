@@ -49,7 +49,7 @@
       <label class="field">العنوان الرئيسي<input id="m-title" value="تقرير اللقاء" maxlength="45"></label>
       <label class="field">اليوم<input id="m-day" placeholder="الثلاثاء" maxlength="20"></label>
       <label class="field">التاريخ<input id="m-date" type="date"></label>
-      <label class="field">لون تصميم التقرير<select id="m-theme" aria-label="لون تصميم تقرير اللقاء"><option value="orange">برتقالي</option><option value="green">أخضر زمردي وذهبي</option><option value="blue">أزرق فيروزي وكحلي</option><option value="burgundy">خمري وذهبي</option></select></label>
+      <div class="meeting-theme-picker" role="group" aria-label="لون خلفية تقرير اللقاء"><strong>اختر لون التقرير</strong><div class="meeting-theme-buttons"><button type="button" class="meeting-theme-button" data-theme="orange" aria-pressed="true"><span class="theme-swatch" style="background:#F78112"></span> برتقالي</button><button type="button" class="meeting-theme-button" data-theme="green" aria-pressed="false"><span class="theme-swatch" style="background:#064734"></span> أخضر</button><button type="button" class="meeting-theme-button" data-theme="blue" aria-pressed="false"><span class="theme-swatch" style="background:#5FA9A8"></span> أزرق</button><button type="button" class="meeting-theme-button" data-theme="burgundy" aria-pressed="false"><span class="theme-swatch" style="background:#7A2E2E"></span> خمري</button></div></div>
       <label class="field">اسم الخانة الأولى<input id="m-label1" value="عنوان الدرس"></label>
       <label class="field">محتوى الخانة الأولى<input id="m-value1" placeholder="سورة النصر"></label>
       <label class="field">اسم الخانة الثانية<input id="m-label2" value="التسميع"></label>
