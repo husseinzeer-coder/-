@@ -46,27 +46,54 @@
   <div class="topline"><div><h1>تقرير اللقاء — القالب الثالث</h1><p class="subtle">إدخال مباشر، حتى 25 طالبًا، وخانات قابلة للتعديل. القالب القديم ذو المجموعتين أُلغي من هذه النسخة، وبقي قالب الـ12 طالبًا.</p></div></div>
   <div class="actions"><button id="m-download">تنزيل صورة PNG</button><button id="m-share" class="secondary">مشاركة الصورة</button><button id="m-print" class="secondary">طباعة / PDF</button><button id="m-reset" class="warn">تفريغ بيانات اليوم</button></div>
   <p id="m-message" class="status" aria-live="polite"></p>
-  <div class="head-controls"><h2>العنوان والمعلومات العلوية</h2>
-    <div class="fields">
-      <label class="field">العنوان الرئيسي<input id="m-title" value="تقرير اللقاء" maxlength="45"></label>
-      <label class="field">اليوم<input id="m-day" placeholder="الثلاثاء" maxlength="20"></label>
-      <label class="field">التاريخ<input id="m-date" type="date"></label>
-      <div class="meeting-theme-picker" role="group" aria-label="لون خلفية تقرير اللقاء"><strong>اختر لون التقرير</strong><div class="meeting-theme-buttons"><button type="button" class="meeting-theme-button" data-theme="orange" aria-pressed="true"><span class="theme-swatch" style="background:#F78112"></span> برتقالي</button><button type="button" class="meeting-theme-button" data-theme="green" aria-pressed="false"><span class="theme-swatch" style="background:#064734"></span> أخضر</button><button type="button" class="meeting-theme-button" data-theme="blue" aria-pressed="false"><span class="theme-swatch" style="background:#5FA9A8"></span> أزرق</button><button type="button" class="meeting-theme-button" data-theme="burgundy" aria-pressed="false"><span class="theme-swatch" style="background:#7A2E2E"></span> خمري</button></div></div>
-      <label class="field">اسم الخانة الأولى<input id="m-label1" value="عنوان الدرس"></label>
-      <label class="field">محتوى الخانة الأولى<input id="m-value1" placeholder="سورة النصر"></label>
-      <label class="field">اسم الخانة الثانية<input id="m-label2" value="التسميع"></label>
-      <label class="field">محتوى الخانة الثانية<input id="m-value2" placeholder="المعارج 1–10"></label>
-      <label class="field">اسم الخانة الثالثة<input id="m-label3" value="التلقين"></label>
-      <label class="field">محتوى الخانة الثالثة<input id="m-value3" placeholder="المعارج 11–22"></label>
+  <details class="meeting-section" id="m-structureSection">
+    <summary><span>بنية الجدول</span><small>العنوان واللون والشعار وأسماء الخانات</small></summary>
+    <div class="meeting-section-body">
+      <div class="fields">
+        <label class="field">العنوان الرئيسي<input id="m-title" value="تقرير اللقاء" maxlength="45"></label>
+        <div class="meeting-theme-picker" role="group" aria-label="لون خلفية تقرير اللقاء"><strong>لون التقرير</strong><div class="meeting-theme-buttons"><button type="button" class="meeting-theme-button" data-theme="orange" aria-pressed="true"><span class="theme-swatch" style="background:#F78112"></span> برتقالي</button><button type="button" class="meeting-theme-button" data-theme="green" aria-pressed="false"><span class="theme-swatch" style="background:#064734"></span> أخضر</button><button type="button" class="meeting-theme-button" data-theme="blue" aria-pressed="false"><span class="theme-swatch" style="background:#5FA9A8"></span> أزرق</button><button type="button" class="meeting-theme-button" data-theme="burgundy" aria-pressed="false"><span class="theme-swatch" style="background:#7A2E2E"></span> خمري</button></div></div>
+        <label class="field">اسم الخانة الأولى<input id="m-label1" value="عنوان الدرس"></label>
+        <label class="field">اسم الخانة الثانية<input id="m-label2" value="التسميع"></label>
+        <label class="field">اسم الخانة الثالثة<input id="m-label3" value="التلقين"></label>
+      </div>
+      <div class="logo-options"><label class="field">شعار المركز (اختياري)<input id="m-logoFile" type="file" accept="image/png,image/jpeg,image/webp"></label><img class="logo-preview" id="m-logoPreview" alt="معاينة الشعار"><button class="secondary" id="m-removeLogo">حذف الشعار</button><span class="subtle">تُقصّ الصورة دائريًا تلقائيًا مع المحافظة على نسبها.</span></div>
+      <h3 class="meeting-subhead">عناوين أعمدة الجدول</h3>
+      <div class="fields">
+        <label class="field">عنوان عمود السورة<input id="m-headSurah" value="السورة"></label>
+        <label class="field">عنوان عمود الآيات<input id="m-headVerses" value="الآيات"></label>
+        <label class="field">عنوان عمود الملاحظات<input id="m-headNotes" value="الملاحظات"></label>
+      </div>
     </div>
-    <div class="logo-options"><label class="field">شعار المركز (اختياري)<input id="m-logoFile" type="file" accept="image/png,image/jpeg,image/webp"></label><img class="logo-preview" id="m-logoPreview" alt="معاينة الشعار"><button class="secondary" id="m-removeLogo">حذف الشعار</button><span class="subtle">تُقصّ الصورة دائريًا تلقائيًا مع المحافظة على نسبها.</span></div>
-  </div>
-  <div class="head-controls"><h2>تعديل عناوين أعمدة الجدول</h2>
-    <div class="fields"><label class="field">السورة<input id="m-headSurah" value="السورة"></label><label class="field">الآيات<input id="m-headVerses" value="الآيات"></label><label class="field">الملاحظات<input id="m-headNotes" value="الملاحظات"></label></div>
-  </div>
-  <div class="students"><div class="students-head"><h2>بيانات الطلاب <span id="m-counter" class="subtle"></span></h2><button id="m-addStudent">+ إضافة طالب</button></div>
-  <p class="subtle">اكتب اسم الطالب أولًا ليظهر صفه في التقرير؛ الصفوف التي تحمل «-» لا تظهر في التقرير، ويزداد ارتفاع الصفوف الظاهرة تلقائيًا. الغائب يظهر بصف مدمج. لون الجائزة قابل للاختيار لكل طالب.</p>
-  <div class="meeting-import"><label for="m-nameList" class="field">لصق كشف الأسماء (اسم واحد في كل سطر)</label><textarea id="m-nameList" rows="5" placeholder="ألصق أسماء الطلاب، كل اسم في سطر مستقل"></textarea><button type="button" id="m-importNames" class="secondary">تعبئة الأسماء من الكشف</button><span class="subtle">يُملأ عدد الصفوف المطابق للأسماء حتى 25 طالبًا، وتبقى البيانات اليومية الحالية ما لم تؤكد استبدالها.</span></div><div class="rows" id="m-rows"></div></div>
+  </details>
+  <details class="meeting-section" id="m-daySection" open>
+    <summary><span>بيانات اليوم</span><small>التاريخ واليوم ومحتويات الخانات</small></summary>
+    <div class="meeting-section-body">
+      <div class="fields">
+        <label class="field">اليوم<input id="m-day" placeholder="الثلاثاء" maxlength="20"></label>
+        <label class="field">التاريخ<input id="m-date" type="date"></label>
+        <label class="field"><span id="m-valueLabel1">عنوان الدرس</span><input id="m-value1" placeholder="سورة النصر"></label>
+        <label class="field"><span id="m-valueLabel2">التسميع</span><input id="m-value2" placeholder="المعارج 1–10"></label>
+        <label class="field"><span id="m-valueLabel3">التلقين</span><input id="m-value3" placeholder="المعارج 11–22"></label>
+      </div>
+    </div>
+  </details>
+  <details class="meeting-section meeting-student-section" id="m-studentsSection" open>
+    <summary><span>بيانات الطلاب <span id="m-counter" class="subtle"></span></span><small>الأسماء والتسميع والانضباط والجوائز</small></summary>
+    <div class="meeting-section-body">
+      <div class="students-head meeting-student-actions">
+        <button type="button" id="m-toggleRoster" class="secondary" aria-expanded="false" aria-controls="m-rosterDetails">＋ إضافة كشف الأسماء</button>
+        <button type="button" id="m-addStudent">+ إضافة طالب</button>
+      </div>
+      <div id="m-rosterDetails" class="meeting-import" hidden>
+        <label for="m-nameList" class="field">لصق كشف الأسماء (اسم واحد في كل سطر)</label>
+        <textarea id="m-nameList" rows="5" placeholder="ألصق أسماء الطلاب، كل اسم في سطر مستقل"></textarea>
+        <button type="button" id="m-importNames" class="secondary">تعبئة الأسماء من الكشف</button>
+        <span class="subtle">تُضاف أسماء الطلاب تلقائيًا بعددها حتى 25 طالبًا. استبدال الكشف الموجود يتطلب التأكيد.</span>
+      </div>
+      <p class="subtle">اكتب اسم الطالب أولًا ليظهر صفه في التقرير؛ الاسم «-» لا يظهر. يمكنك رفع الطالب أو خفضه بالسهمين دون فقد بياناته.</p>
+      <div class="rows" id="m-rows"></div>
+    </div>
+  </details>
   <p class="footer">تُحفظ البيانات تلقائيًا في متصفح الجهاز، ولا تُرسل إلى خادم. لا توجد ميزة استيراد Google Sheets في هذا القالب.</p>
 </section>
 <section class="panel preview"><h2>معاينة التقرير — هي نفسها صورة PNG النهائية</h2><canvas id="m-report" width="941" height="1672" aria-label="معاينة تقرير اللقاء"></canvas></section>
